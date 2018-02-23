@@ -7,9 +7,11 @@ import threading
 import sys
 import time
 import signal
-from GLHelper.glHelper import *
-import GLHelper.builder
-import GLHelper.glutHelper
+
+from .Renderable import *
+from . import Builder
+from . import Camera
+from . import InputHandler
 
 # Global variables.
 # List of renderable to render.
@@ -27,9 +29,9 @@ selection = -1
 
 clearColor = (1.0,1.0,1.0,1.0)
 
-prerender = None 
-postrender = None
-inputhandler = None
+func_preRender = None 
+func_postRender = None
+func_main = None
 
 title = b''
 running = True
@@ -38,15 +40,14 @@ width, height = 600, 600
 FOV, ASPECT_RATIO, NEAR, FAR = 60.0, width / height, 1.0, 2000.0
 
 # Set up camera
-camera = glutHelper.Camera(DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_ROTATION)
+camera = Camera.Camera(DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_ROTATION)
 camera_controller = None
 
-
-def main(argv):
+def Start(argv):
     global title, running
     global width, height
     global FOV, ASPECT_RATIO, NEAR, FAR
-    global inputhandler
+    global func_main
     FOV, ASPECT_RATIO, NEAR, FAR = 60.0, width / height, 1.0, 2000.0
     
     # Initialize window.
@@ -91,7 +92,7 @@ def main(argv):
     def render():
         global camera
         global FOV, ASPECT_RATIO, NEAR, FAR
-        global prerender, postrender
+        global func_preRender, func_postRender
         try:
             # Set matrix mode
             glMatrixMode(GL_PROJECTION)
@@ -103,8 +104,8 @@ def main(argv):
             # Reset Camera
             glPushMatrix()
             glMultMatrixf(camera.matrix.c_values())
-            if prerender:
-                prerender()
+            if func_preRender:
+                func_preRender()
             # Render all renderables
             glPushMatrix()
             for matrix in transformation:
@@ -113,8 +114,8 @@ def main(argv):
             for obj in to_render:
                 obj.render()
             glPopMatrix()
-            if postrender:
-                postrender()
+            if func_postRender:
+                func_postRender()
             glPopMatrix()
             glutSwapBuffers()
         except Exception as e:
@@ -132,14 +133,15 @@ def main(argv):
     # Set binding
     glutDisplayFunc(render)
     glutReshapeFunc(resize)
-    glutHelper.initialize_keyboard()
-    glutHelper.initialize_mouse()
+    InputHandler.initialize_keyboard()
+    InputHandler.initialize_mouse()
     glutIdleFunc(idle)
-    # Initialize keyboard input handler
-    inputThread = threading.Thread(None, inputhandler)
-    inputThread.start()
+    # Start camera
     if camera_controller:
         camera_controller.start()
+    # Initialize keyboard input handler
+    inputThread = threading.Thread(None, func_main)
+    inputThread.start()
     # Run the main loop
     glutMainLoop()
     # No hope of ever reaching here
@@ -300,7 +302,7 @@ def undo():
     '''Undo a transformation'''
     global tansformation_history, transformation
     matrix = pop_matrix()
-    transformation_history.append((get_selected_renderable(), matrix))
+    transformation_history.append((to_render[selection], matrix))
 
 def redo():
     '''Redo a transformation'''

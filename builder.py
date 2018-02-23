@@ -1,4 +1,4 @@
-from GLHelper.glHelper import *
+from GLHelper.Renderable import *
 import math
 
 def line(p1, p2, color):
