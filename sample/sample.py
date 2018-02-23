@@ -7,14 +7,10 @@ from OpenGL.GLUT import *
 import sys
 # Imports the 3D opengl helper Module.
 import SimplePyToolKit as main
-from SimplePyToolKit import doc_get, doc_get_usage, to_render, add_renderable
+from SimplePyToolKit import doc_get, add_renderable
 from SimplePyToolKit.Executor import *
 import SimplePyToolKit.Builder as Builder
 import SimplePyToolKit.Camera as Camera
-import SimplePyToolKit.InputHandler as InputHandler
-
-import functools
-import random
 
 selection = -1
 main.HELP_DOC_STRING = {
