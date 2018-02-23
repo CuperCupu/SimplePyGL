@@ -1,7 +1,7 @@
 from .Renderable import *
 import math
 
-def line(p1, p2, color):
+def line(p1, p2, color=(0.1, 0.4, 0.7, 1.0)):
     ''' Create a line object.
     Args:
         p1 (tuple): len(p1) == 3, represents x, y and z.
