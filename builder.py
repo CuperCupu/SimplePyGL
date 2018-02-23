@@ -1,4 +1,4 @@
-from GLHelper.Renderable import *
+from .Renderable import *
 import math
 
 def line(p1, p2, color):
@@ -36,7 +36,7 @@ def circle(radius, segments = 12, color = (0.4, 0.7, 1.0, 1.0)):
     return ren_obj
     
 
-def polygon(points):
+def polygon(points, color = (0.4, 0.7, 1.0, 1.0)):
     '''Create a polygonal shape based on several input points. Doesn't automatically create a concave shape.
     Args:
         points (list): list of Vector or tuple with len of 3 representing x, y and z.
@@ -58,7 +58,6 @@ def polygon(points):
             raise TypeError("unsupported type", p.__class__.__name__)
     # Create a simple polygon, doesn't support concave shape.
     ren_obj = Renderable()
-    color = (0.4, 0.7, 1.0, 1.0)
     ren_obj.attach(Tri(vertices[0], vertices[1], vertices[2], [color], True))
     p = 2
     for i in range(3, count):
@@ -69,7 +68,7 @@ def polygon(points):
         ren_obj.attach(Tri(vertices[c], vertices[n], vertices[p], [color], True))
     return ren_obj
 
-def block(p, width, height, length):
+def block(p, width, height, length, fill_color = (0.4, 0.7, 1.0, 1.0), outline_color = (0.1, 0.4, 0.7, 1.0)):
     '''Create a 3D block based on a position, width, height and length.
     Args:
         p (tuple): len(p) == 3, represents x, y and z of the position of the newly created block.
@@ -88,7 +87,6 @@ def block(p, width, height, length):
     # Start creating the renderable.
     ren_obj = Renderable()
     # Generate solid layer
-    color = (0.4, 0.7, 1.0, 1.0)
     vertices = [
         Vector(x - offset_x, y - offset_y, z + offset_z),
         Vector(x + offset_x, y - offset_y, z + offset_z),
@@ -100,19 +98,18 @@ def block(p, width, height, length):
         Vector(x - offset_x, y + offset_y, z - offset_z),
     ]
     # Bottom
-    ren_obj.attach(Quad(vertices[3], vertices[2], vertices[1], vertices[0], [color], True))
+    ren_obj.attach(Quad(vertices[3], vertices[2], vertices[1], vertices[0], [fill_color], True))
     # Top
-    ren_obj.attach(Quad(vertices[4], vertices[5], vertices[6], vertices[7], [color], True))
+    ren_obj.attach(Quad(vertices[4], vertices[5], vertices[6], vertices[7], [fill_color], True))
     # Front
-    ren_obj.attach(Quad(vertices[0], vertices[1], vertices[5], vertices[4], [color], True))
+    ren_obj.attach(Quad(vertices[0], vertices[1], vertices[5], vertices[4], [fill_color], True))
     # Back
-    ren_obj.attach(Quad(vertices[2], vertices[3], vertices[7], vertices[6], [color], True))
+    ren_obj.attach(Quad(vertices[2], vertices[3], vertices[7], vertices[6], [fill_color], True))
     # Left
-    ren_obj.attach(Quad(vertices[3], vertices[0], vertices[4], vertices[7], [color], True))
+    ren_obj.attach(Quad(vertices[3], vertices[0], vertices[4], vertices[7], [fill_color], True))
     # Right
-    ren_obj.attach(Quad(vertices[1], vertices[2], vertices[6], vertices[5], [color], True))
+    ren_obj.attach(Quad(vertices[1], vertices[2], vertices[6], vertices[5], [fill_color], True))
     # Generate outer lines
-    color = (0.1, 0.4, 0.7, 1.0)
     offset_x += 0.005
     offset_y += 0.005
     offset_z += 0.005
@@ -127,23 +124,23 @@ def block(p, width, height, length):
         Vector(x - offset_x, y + offset_y, z - offset_z),
     ]
     # Bottom lines
-    ren_obj.attach(Line(vertices[0], vertices[1], [color]))
-    ren_obj.attach(Line(vertices[1], vertices[2], [color]))
-    ren_obj.attach(Line(vertices[2], vertices[3], [color]))
-    ren_obj.attach(Line(vertices[3], vertices[0], [color]))
+    ren_obj.attach(Line(vertices[0], vertices[1], [outline_color]))
+    ren_obj.attach(Line(vertices[1], vertices[2], [outline_color]))
+    ren_obj.attach(Line(vertices[2], vertices[3], [outline_color]))
+    ren_obj.attach(Line(vertices[3], vertices[0], [outline_color]))
     # Top lines
-    ren_obj.attach(Line(vertices[4], vertices[5], [color]))
-    ren_obj.attach(Line(vertices[5], vertices[6], [color]))
-    ren_obj.attach(Line(vertices[6], vertices[7], [color]))
-    ren_obj.attach(Line(vertices[7], vertices[4], [color]))
+    ren_obj.attach(Line(vertices[4], vertices[5], [outline_color]))
+    ren_obj.attach(Line(vertices[5], vertices[6], [outline_color]))
+    ren_obj.attach(Line(vertices[6], vertices[7], [outline_color]))
+    ren_obj.attach(Line(vertices[7], vertices[4], [outline_color]))
     # Corner lines
-    ren_obj.attach(Line(vertices[0], vertices[4], [color]))
-    ren_obj.attach(Line(vertices[1], vertices[5], [color]))
-    ren_obj.attach(Line(vertices[2], vertices[6], [color]))
-    ren_obj.attach(Line(vertices[3], vertices[7], [color]))
+    ren_obj.attach(Line(vertices[0], vertices[4], [outline_color]))
+    ren_obj.attach(Line(vertices[1], vertices[5], [outline_color]))
+    ren_obj.attach(Line(vertices[2], vertices[6], [outline_color]))
+    ren_obj.attach(Line(vertices[3], vertices[7], [outline_color]))
     return ren_obj
 
-def cube(p, size):
+def cube(p, size, fill_color = (0.4, 0.7, 1.0, 1.0), outline_color = (0.1, 0.4, 0.7, 1.0)):
     '''Create a 3D cube based on a point and a size.
     Args:
         p (tuple): len(p) == 3, represents x, y and z of the position of the newly created cube.
@@ -151,9 +148,9 @@ def cube(p, size):
     Returns:
         Renderable: a cube object.
     '''
-    return block(p, size, size, size) # Build a block with the same witdh, height and length.
+    return block(p, size, size, size, fill_color, outline_color) # Build a block with the same witdh, height and length.
 
-def pyramid(p, height, radius, base_count=4):
+def pyramid(p, height, radius, base_count=4, fill_color=(0.4, 0.7, 1.0, 1.0), outline_color=(0.1, 0.4, 0.7, 1.0)):
     '''Create a 3D pyramid.
     Args:
         p (tuple): len(p) == 3, represents x, y and z of the position of the newly created pyramid.
@@ -170,14 +167,12 @@ def pyramid(p, height, radius, base_count=4):
         angle = i / base_count * math.pi * 2
         vertices.append(Vector(radius * math.cos(angle), 0, radius * math.sin(angle)))
     ren_obj = polygon(vertices)
-    color = (0.4, 0.7, 1.0, 1.0)
-    color2 = (0.1, 0.4, 0.7, 1.0)
     for i in range(0, len(vertices)):
         n = i + 1
         if n == len(vertices):
             n = 0
-        ren_obj.attach(Tri(vertices[i], vertices[n], top, [color], True))
-        ren_obj.attach(Line(vertices[i], top, [color2]))
-        ren_obj.attach(Line(vertices[i], vertices[n], [color2]))
+        ren_obj.attach(Tri(vertices[i], vertices[n], top, [fill_color], True))
+        ren_obj.attach(Line(vertices[i], top, [outline_color]))
+        ren_obj.attach(Line(vertices[i], vertices[n], [outline_color]))
 
     return ren_obj

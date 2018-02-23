@@ -43,6 +43,9 @@ FOV, ASPECT_RATIO, NEAR, FAR = 60.0, width / height, 1.0, 2000.0
 camera = Camera.Camera(DEFAULT_CAMERA_POSITION, DEFAULT_CAMERA_ROTATION)
 camera_controller = None
 
+class ActionError(Exception):
+    pass
+
 def Start(argv):
     global title, running
     global width, height
@@ -219,6 +222,45 @@ def doc_get_usage(*args, raw=False):
         retval = "no help string found for '{}'.".format(' '.join(args))
     return retval
 
+def help(*args):
+    global HELP_DOC_STRING
+    if args:
+        success = False
+        retval = doc_get('help', *args)
+        if retval:
+            success = True
+            return retval
+        retval = doc_get_usage(*args, raw=True)
+        if retval:
+            success = True
+            return doc_get_usage(*args)
+        if not success:
+            raise ActionError("no help string found for '{}'.".format(' '.join(args)))
+    else:
+        all_help = []
+        longest = 0
+        if 'help' in HELP_DOC_STRING:
+            retval = ""
+            for k, v in HELP_DOC_STRING['help'].items():
+                if k == "":
+                    retval += v
+                else:
+                    if isinstance(v, dict) and "" in v:
+                        v = v[""]
+                    if v:
+                        all_help.append((k, v))
+                        if len(k) > longest:
+                            longest = len(k)
+            for name, doc in all_help:
+                l = len(name)
+                indent = "".join(" " for _ in range(l, longest))
+                if retval:
+                    retval += '\n'
+                retval += name + indent + " : " + doc
+            return retval
+        else:
+            raise ActionError('no help string found.')
+
 def remove_animation(animator):
     '''Remove an animation from the list of animators.'''
     global animators
@@ -318,6 +360,6 @@ def redo():
             if len(matrix) > 1:
                 transformation.append(len(matrix))
         else:
-            print("no action to redo")
+            raise ActionError("no action to redo")
     else:
-        print("no action to redo")
+        raise ActionError("no action to redo")
