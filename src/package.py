@@ -1,5 +1,5 @@
 name='SimplePyToolKit'
-version='0.0.1'
+version='0.0.2'
 author='Suhendi'
 author_email='suhendi999@gmail.com'
 url="https://github.com/CuperCupu/SimplePyToolKit"

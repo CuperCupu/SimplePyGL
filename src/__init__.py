@@ -191,7 +191,7 @@ def doc_get(section, *subnames):
                 else: # Parent section still exists.
                     i += 1
         else:
-            retval = None
+            retval = ""
     # If the retval is a dict, only returns if there is a key of empty string.
     if isinstance(retval, dict):
         if "" in retval:
@@ -229,13 +229,15 @@ def help(*args):
         retval = doc_get('help', *args)
         if retval:
             success = True
-            return retval
-        retval = doc_get_usage(*args, raw=True)
-        if retval:
+        usage = doc_get_usage(*args, raw=True)
+        if usage:
             success = True
-            return doc_get_usage(*args)
+            if retval:
+                retval += '\n'
+            retval += 'usage: ' + usage
         if not success:
             raise ActionError("no help string found for '{}'.".format(' '.join(args)))
+        return retval
     else:
         all_help = []
         longest = 0
